@@ -71,6 +71,7 @@
       padding: 24px 0;
       display: flex;
       flex-direction: column;
+      overflow-y: auto;
     }
     
     .sidebar-logo {
@@ -243,6 +244,17 @@
       z-index: 9999;
     }
     #toast.show { transform: translateY(0); opacity: 1; }
+    
+    /* Category row style */
+    .category-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 15px 20px;
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+    }
   </style>
 </head>
 <body>
@@ -269,22 +281,14 @@
       <div class="sidebar-logo">
         <img src="logo-v.png" alt="Vero Eleganza">
       </div>
-      <div class="nav-item active" data-target="config">
-        Configurações Gerais
+      <div class="nav-item active" data-target="config">Configurações Gerais</div>
+      <div class="nav-item" data-target="manage-categories">Gerenciar Categorias</div>
+      
+      <div id="dynamic-nav-items">
+         <!-- Nav items injected here -->
       </div>
-      <div class="nav-item" data-target="cat-ternos">
-        Ternos
-      </div>
-      <div class="nav-item" data-target="cat-camisas">
-        Camisas
-      </div>
-      <div class="nav-item" data-target="cat-sueteres">
-        Suéteres
-      </div>
-      <div class="nav-item" data-target="cat-gravatas">
-        Gravatas
-      </div>
-      <div class="nav-item logout" id="btn-logout">
+      
+      <div class="nav-item logout" id="btn-logout" style="margin-top: 30px;">
         Sair
       </div>
     </div>
@@ -295,9 +299,6 @@
       <div class="topbar">
         <div>Painel de Controle</div>
         <div class="topbar-actions">
-          <button class="btn btn-outline" id="btn-import" onclick="document.getElementById('import-file').click()">Importar JSON</button>
-          <input type="file" id="import-file" style="display:none" accept=".json">
-          <button class="btn btn-outline" id="btn-export">Exportar JSON</button>
           <a href="index.html" target="_blank" class="btn btn-outline">Ver Site</a>
           <button class="btn btn-gold" id="btn-save-all">Salvar Tudo</button>
         </div>
@@ -324,30 +325,28 @@
             </div>
           </div>
         </div>
-
-        <!-- Views: Categorias (Geradas dinamicamente) -->
-        <div id="view-cat-ternos" class="section-view">
-          <h2 class="section-title">Ternos</h2>
-          <div class="product-list" id="list-ternos"></div>
-          <button class="btn btn-outline" onclick="addProduct('ternos')">+ Adicionar Terno</button>
+        
+        <!-- View: Gerenciar Categorias -->
+        <div id="view-manage-categories" class="section-view">
+          <h2 class="section-title">Gerenciar Categorias</h2>
+          <div class="config-panel" style="margin-bottom: 20px;">
+            <div class="form-group">
+              <label>ID da Categoria (sem espaços, minúsculo, ex: sapatos)</label>
+              <input type="text" id="new-cat-id" placeholder="ID da categoria">
+            </div>
+            <div class="form-group">
+              <label>Nome da Categoria (Ex: Sapatos de Couro)</label>
+              <input type="text" id="new-cat-name" placeholder="Nome da categoria">
+            </div>
+            <button class="btn btn-gold" id="btn-add-category">Adicionar Nova Categoria</button>
+          </div>
+          <div id="category-list-manager" class="product-list">
+            <!-- Categorias listadas aqui -->
+          </div>
         </div>
 
-        <div id="view-cat-camisas" class="section-view">
-          <h2 class="section-title">Camisas</h2>
-          <div class="product-list" id="list-camisas"></div>
-          <button class="btn btn-outline" onclick="addProduct('camisas')">+ Adicionar Camisa</button>
-        </div>
-
-        <div id="view-cat-sueteres" class="section-view">
-          <h2 class="section-title">Suéteres</h2>
-          <div class="product-list" id="list-sueteres"></div>
-          <button class="btn btn-outline" onclick="addProduct('sueteres')">+ Adicionar Suéter</button>
-        </div>
-
-        <div id="view-cat-gravatas" class="section-view">
-          <h2 class="section-title">Gravatas</h2>
-          <div class="product-list" id="list-gravatas"></div>
-          <button class="btn btn-outline" onclick="addProduct('gravatas')">+ Adicionar Gravata</button>
+        <div id="dynamic-category-views">
+          <!-- Views de Produtos das categorias injetadas aqui -->
         </div>
 
       </div>
@@ -356,57 +355,83 @@
 
   <div id="toast">Alterações salvas!</div>
 
-  <!-- JAVASCRIPT -->
-  <script>
-    // --- DEFAULT DATA ---
-    const DEFAULT_CONFIG = {
-      whatsappNumber: '5551999999999',
-      instagramUrl: 'https://www.instagram.com/vero.eleganza/'
-    };
+  <!-- JAVASCRIPT MODULE (FIREBASE) -->
+  <script type="module">
+    import { db, doc, getDoc, setDoc } from './firebase.js';
 
-    const DEFAULT_PRODUCTS = {
-      ternos: [
-        { id: 't1', name: 'Terno Slim Masculino — Preto', price: 1499.90, link: '', badge: 'Destaque', image: 'assets/images/ternos/terno-slim-preto.png', active: true },
-        { id: 't2', name: 'Terno Slim Masculino — Grafite', price: 1599.90, link: '', badge: 'Novo', image: 'assets/images/ternos/terno-slim-grafite.webp', active: true },
-        { id: 't3', name: 'Terno Slim Masculino — Azul Marinho', price: 1599.90, link: '', badge: '', image: 'assets/images/ternos/terno-slim-preto.png', active: true },
-        { id: 't4', name: 'Terno Slim Masculino — Cinza Chumbo', price: 1799.90, link: '', badge: 'Premium', image: 'assets/images/ternos/terno-slim-grafite.webp', active: true }
-      ],
-      camisas: [
-        { id: 'c1', name: 'Camisa Social Slim — Branca', price: 249.90, link: '', badge: 'Essencial', image: 'assets/images/camisas/camisa-social-branca.jpg', active: true },
-        { id: 'c2', name: 'Camisa Social Slim — Azul Marinho', price: 279.90, link: '', badge: '', image: 'assets/images/camisas/camisa-social-azul.jpg', active: true },
-        { id: 'c3', name: 'Camisa Social Slim — Listrada Azul', price: 299.90, link: '', badge: 'Novo', image: 'assets/images/camisas/camisa-social-listrada.jpg', active: true },
-        { id: 'c4', name: 'Camisa Social Slim — Preta', price: 269.90, link: '', badge: '', image: 'assets/images/camisas/camisa-social-branca.jpg', active: true }
-      ],
-      sueteres: [
-        { id: 's1', name: 'Suéter Gola V — Preto', price: 329.90, link: '', badge: 'Inverno', image: 'assets/images/sueteres/sueter-preto.jpg', active: true },
-        { id: 's2', name: 'Suéter Gola Redonda — Cinza', price: 299.90, link: '', badge: '', image: 'assets/images/sueteres/sueter-cinza.jpg', active: true },
-        { id: 's3', name: 'Suéter Gola V — Azul Marinho', price: 329.90, link: '', badge: 'Novo', image: 'assets/images/sueteres/sueter-preto.jpg', active: true },
-        { id: 's4', name: 'Suéter Gola Alta — Preto', price: 399.90, link: '', badge: 'Premium', image: 'assets/images/sueteres/sueter-cinza.jpg', active: true }
-      ],
-      gravatas: [
-        { id: 'g1', name: 'Gravata Seda — Preta Geométrica', price: 179.90, link: '', badge: 'Clássica', image: 'assets/images/gravatas/gravata-seda-preta.jpg', active: true },
-        { id: 'g2', name: 'Gravata Seda — Vinho Listrada', price: 189.90, link: '', badge: 'Destaque', image: 'assets/images/gravatas/gravata-seda-vinho.jpg', active: true },
-        { id: 'g3', name: 'Gravata Seda — Azul Marinho', price: 169.90, link: '', badge: '', image: 'assets/images/gravatas/gravata-seda-preta.jpg', active: true },
-        { id: 'g4', name: 'Gravata Seda — Cinza Prata', price: 179.90, link: '', badge: 'Elegante', image: 'assets/images/gravatas/gravata-seda-vinho.jpg', active: true }
-      ]
-    };
-
-    // --- STATE ---
+    // Default structure for new app data
     let appData = {
-      config: JSON.parse(localStorage.getItem('veroEleganza_config')) || DEFAULT_CONFIG,
-      products: JSON.parse(localStorage.getItem('veroEleganza_products')) || DEFAULT_PRODUCTS
+      config: {
+        whatsappNumber: '5551999999999',
+        instagramUrl: 'https://www.instagram.com/vero.eleganza/'
+      },
+      categories: [
+        { id: 'ternos', name: 'Ternos' },
+        { id: 'camisas', name: 'Camisas' },
+        { id: 'sueteres', name: 'Suéteres' },
+        { id: 'gravatas', name: 'Gravatas' }
+      ],
+      products: {
+        ternos: [], camisas: [], sueteres: [], gravatas: []
+      }
+    };
+
+    // Helper functions for global scope (needed because modules are isolated)
+    window.handleImageUpload = function(event, id) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('img-prev-' + id).src = e.target.result;
+          document.getElementById('img-prev-' + id).dataset.base64 = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    };
+
+    window.removeProduct = function(category, id) {
+      if (confirm('Tem certeza que deseja excluir este produto?')) {
+        appData.products[category] = appData.products[category].filter(p => p.id !== id);
+        const row = document.getElementById('row-' + id);
+        if (row) row.remove();
+      }
+    };
+
+    window.removeCategory = function(catId) {
+      if (confirm('Atenção: Ao excluir a categoria, todos os produtos dela serão apagados. Tem certeza?')) {
+        appData.categories = appData.categories.filter(c => c.id !== catId);
+        delete appData.products[catId];
+        renderApp();
+      }
+    };
+
+    window.addProduct = function(category) {
+      if (!appData.products[category]) {
+        appData.products[category] = [];
+      }
+      const id = Date.now().toString();
+      const newProduct = {
+        id: id,
+        name: 'Novo Produto',
+        price: 0.00,
+        link: '',
+        badge: '',
+        image: 'assets/images/hero-bg.jpg',
+        active: true
+      };
+      appData.products[category].push(newProduct);
+      document.getElementById('list-' + category).appendChild(createProductRow(category, newProduct));
     };
 
     // --- LOGIN LOGIC ---
     const pwdHash = localStorage.getItem('veroEleganza_adminPwd') || btoa('vero2026');
-    
     document.getElementById('login-form').addEventListener('submit', function(e) {
       e.preventDefault();
       const input = document.getElementById('login-pwd').value;
       if (btoa(input) === pwdHash) {
         document.getElementById('login-screen').style.display = 'none';
         document.getElementById('dashboard').style.display = 'grid';
-        renderApp();
+        loadFirebaseData();
       } else {
         document.getElementById('login-error').style.display = 'block';
       }
@@ -416,30 +441,93 @@
       location.reload();
     });
 
-    // --- NAVIGATION ---
-    document.querySelectorAll('.nav-item').forEach(item => {
-      if (item.classList.contains('logout')) return;
-      item.addEventListener('click', () => {
-        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-        document.querySelectorAll('.section-view').forEach(s => s.classList.remove('active'));
-        
-        item.classList.add('active');
-        document.getElementById('view-' + item.dataset.target).classList.add('active');
-      });
-    });
+    async function loadFirebaseData() {
+      try {
+        const storeDoc = await getDoc(doc(db, "vero_eleganza", "store_data"));
+        if (storeDoc.exists()) {
+          const data = storeDoc.data();
+          if (data.config) appData.config = data.config;
+          if (data.categories) appData.categories = data.categories;
+          if (data.products) appData.products = data.products;
+        } else {
+          // If Firestore is empty, try to get from localStorage as fallback
+          const localProducts = JSON.parse(localStorage.getItem('veroEleganza_products'));
+          const localConfig = JSON.parse(localStorage.getItem('veroEleganza_config'));
+          if (localProducts) {
+             appData.products = localProducts;
+          }
+          if (localConfig) {
+             appData.config = localConfig;
+          }
+        }
+        renderApp();
+      } catch(err) {
+        console.error("Erro ao carregar do Firebase:", err);
+        alert("Erro ao conectar ao banco de dados.");
+      }
+    }
 
     // --- RENDER APP ---
     function renderApp() {
-      // Configs
-      document.getElementById('cfg-whatsapp').value = appData.config.whatsappNumber;
-      document.getElementById('cfg-instagram').value = appData.config.instagramUrl;
+      // Basic Configs
+      document.getElementById('cfg-whatsapp').value = appData.config.whatsappNumber || '';
+      document.getElementById('cfg-instagram').value = appData.config.instagramUrl || '';
 
-      // Products
-      ['ternos', 'camisas', 'sueteres', 'gravatas'].forEach(cat => {
-        const container = document.getElementById('list-' + cat);
-        container.innerHTML = '';
-        appData.products[cat].forEach(p => {
-          container.appendChild(createProductRow(cat, p));
+      // Category Manager Tab
+      const catListManager = document.getElementById('category-list-manager');
+      catListManager.innerHTML = '';
+      appData.categories.forEach(cat => {
+        catListManager.insertAdjacentHTML('beforeend', `
+          <div class="category-row">
+             <div><strong>${cat.name}</strong> <span style="color:var(--text-muted);font-size:12px;">(ID: ${cat.id})</span></div>
+             <button class="btn btn-danger" onclick="removeCategory('${cat.id}')">Excluir</button>
+          </div>
+        `);
+      });
+
+      // Clear dynamic Nav Items and Views
+      const dynamicNav = document.getElementById('dynamic-nav-items');
+      const dynamicViews = document.getElementById('dynamic-category-views');
+      dynamicNav.innerHTML = '';
+      dynamicViews.innerHTML = '';
+
+      appData.categories.forEach(cat => {
+        // Nav Item
+        const navItem = document.createElement('div');
+        navItem.className = 'nav-item';
+        navItem.dataset.target = `cat-${cat.id}`;
+        navItem.innerText = cat.name;
+        dynamicNav.appendChild(navItem);
+
+        // Section View
+        const viewDiv = document.createElement('div');
+        viewDiv.id = `view-cat-${cat.id}`;
+        viewDiv.className = 'section-view';
+        viewDiv.innerHTML = `
+          <h2 class="section-title">${cat.name}</h2>
+          <div class="product-list" id="list-${cat.id}"></div>
+          <button class="btn btn-outline" onclick="addProduct('${cat.id}')">+ Adicionar Produto</button>
+        `;
+        dynamicViews.appendChild(viewDiv);
+
+        // Render Products inside View
+        const pList = viewDiv.querySelector(`#list-${cat.id}`);
+        const prods = appData.products[cat.id] || [];
+        prods.forEach(p => {
+          pList.appendChild(createProductRow(cat.id, p));
+        });
+      });
+
+      // Reattach nav events
+      document.querySelectorAll('.nav-item').forEach(item => {
+        if (item.classList.contains('logout')) return;
+        item.addEventListener('click', () => {
+          document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+          document.querySelectorAll('.section-view').forEach(s => s.classList.remove('active'));
+          
+          item.classList.add('active');
+          const targetView = document.getElementById('view-' + item.dataset.target);
+          if (targetView) targetView.classList.add('active');
         });
       });
     }
@@ -452,7 +540,7 @@
       const badgeOptions = ['Nenhum', 'Destaque', 'Novo', 'Premium', 'Inverno', 'Clássica', 'Essencial', 'Elegante']
         .map(b => `<option value="${b==='Nenhum'?'':b}" ${product.badge===b?'selected':''}>${b}</option>`).join('');
 
-      const imgSrc = product.image.startsWith('data:') || product.image.startsWith('http') || product.image.startsWith('assets') ? product.image : 'assets/images/hero-bg.jpg';
+      const imgSrc = product.image ? product.image : 'assets/images/hero-bg.jpg';
 
       div.innerHTML = `
         <div class="product-row-image" onclick="document.getElementById('img-upload-${product.id}').click()">
@@ -493,107 +581,83 @@
       return div;
     }
 
-    // --- ACTIONS ---
-    window.handleImageUpload = function(event, id) {
-      const file = event.target.files[0];
-      if (file) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          document.getElementById('img-prev-' + id).src = e.target.result;
-          // Guardar na propriedade data do img para salvar depois
-          document.getElementById('img-prev-' + id).dataset.base64 = e.target.result;
-        }
-        reader.readAsDataURL(file);
-      }
-    };
+    // --- ADD CATEGORY ---
+    document.getElementById('btn-add-category').addEventListener('click', () => {
+      const idInput = document.getElementById('new-cat-id');
+      const nameInput = document.getElementById('new-cat-name');
+      const catId = idInput.value.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '');
+      const catName = nameInput.value.trim();
 
-    window.addProduct = function(category) {
-      const id = Date.now().toString();
-      const newProduct = {
-        id: id,
-        name: 'Novo Produto',
-        price: 0.00,
-        link: '',
-        badge: '',
-        image: 'assets/images/hero-bg.jpg',
-        active: true
-      };
-      appData.products[category].push(newProduct);
-      document.getElementById('list-' + category).appendChild(createProductRow(category, newProduct));
-    };
-
-    window.removeProduct = function(category, id) {
-      if (confirm('Tem certeza que deseja excluir este produto?')) {
-        appData.products[category] = appData.products[category].filter(p => p.id !== id);
-        document.getElementById('row-' + id).remove();
+      if (!catId || !catName) {
+        alert("Preencha o ID e o Nome da Categoria.");
+        return;
       }
-    };
+      if (appData.categories.some(c => c.id === catId)) {
+        alert("Já existe uma categoria com este ID.");
+        return;
+      }
+
+      appData.categories.push({ id: catId, name: catName });
+      appData.products[catId] = [];
+      
+      idInput.value = '';
+      nameInput.value = '';
+      
+      renderApp();
+      showToast('Categoria adicionada! Lembre de salvar.');
+    });
 
     // --- SAVE ---
-    document.getElementById('btn-save-all').addEventListener('click', () => {
-      // Config
-      appData.config.whatsappNumber = document.getElementById('cfg-whatsapp').value;
-      appData.config.instagramUrl = document.getElementById('cfg-instagram').value;
-      
-      const newPwd = document.getElementById('cfg-password').value;
-      if (newPwd) {
-        localStorage.setItem('veroEleganza_adminPwd', btoa(newPwd));
-        document.getElementById('cfg-password').value = '';
-      }
+    document.getElementById('btn-save-all').addEventListener('click', async () => {
+      const saveBtn = document.getElementById('btn-save-all');
+      saveBtn.innerText = "Salvando...";
+      saveBtn.disabled = true;
 
-      // Products
-      ['ternos', 'camisas', 'sueteres', 'gravatas'].forEach(cat => {
-        appData.products[cat].forEach(p => {
-          if(document.getElementById('row-' + p.id)) {
-            p.name = document.getElementById('name-' + p.id).value;
-            p.price = parseFloat(document.getElementById('price-' + p.id).value);
-            p.badge = document.getElementById('badge-' + p.id).value;
-            p.link = document.getElementById('link-' + p.id).value;
-            p.active = document.getElementById('active-' + p.id).checked;
-            
-            const imgEl = document.getElementById('img-prev-' + p.id);
-            if (imgEl.dataset.base64) {
-              p.image = imgEl.dataset.base64;
-            }
-          }
-        });
-      });
-
-      // Salvar no localStorage
-      localStorage.setItem('veroEleganza_config', JSON.stringify(appData.config));
-      localStorage.setItem('veroEleganza_products', JSON.stringify(appData.products));
-
-      showToast();
-    });
-
-    // --- IMPORT/EXPORT ---
-    document.getElementById('btn-export').addEventListener('click', () => {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
-      const downloadAnchorNode = document.createElement('a');
-      downloadAnchorNode.setAttribute("href", dataStr);
-      downloadAnchorNode.setAttribute("download", "vero_eleganza_backup.json");
-      document.body.appendChild(downloadAnchorNode);
-      downloadAnchorNode.click();
-      downloadAnchorNode.remove();
-    });
-
-    document.getElementById('import-file').addEventListener('change', function(e) {
-      const file = e.target.files[0];
-      if (!file) return;
-      const reader = new FileReader();
-      reader.onload = function(e) {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (imported.config && imported.products) {
-            appData = imported;
-            renderApp();
-            showToast('JSON Importado. Lembre de Salvar Tudo!');
-          }
-        } catch (err) {
-          alert("Arquivo JSON inválido.");
+      try {
+        // Config
+        appData.config.whatsappNumber = document.getElementById('cfg-whatsapp').value;
+        appData.config.instagramUrl = document.getElementById('cfg-instagram').value;
+        
+        const newPwd = document.getElementById('cfg-password').value;
+        if (newPwd) {
+          localStorage.setItem('veroEleganza_adminPwd', btoa(newPwd));
+          document.getElementById('cfg-password').value = '';
         }
-      };
-      reader.readAsText(file);
+
+        // Gather Products from UI
+        appData.categories.forEach(cat => {
+          const catProds = appData.products[cat.id] || [];
+          catProds.forEach(p => {
+            if(document.getElementById('row-' + p.id)) {
+              p.name = document.getElementById('name-' + p.id).value;
+              p.price = parseFloat(document.getElementById('price-' + p.id).value);
+              p.badge = document.getElementById('badge-' + p.id).value;
+              p.link = document.getElementById('link-' + p.id).value;
+              p.active = document.getElementById('active-' + p.id).checked;
+              
+              const imgEl = document.getElementById('img-prev-' + p.id);
+              if (imgEl.dataset.base64) {
+                p.image = imgEl.dataset.base64;
+              }
+            }
+          });
+        });
+
+        // Push to Firebase
+        await setDoc(doc(db, "vero_eleganza", "store_data"), {
+           config: appData.config,
+           categories: appData.categories,
+           products: appData.products
+        });
+
+        showToast('Tudo salvo no Firebase!');
+      } catch (e) {
+        console.error("Erro ao salvar:", e);
+        alert("Erro ao salvar no banco de dados.");
+      } finally {
+        saveBtn.innerText = "Salvar Tudo";
+        saveBtn.disabled = false;
+      }
     });
 
     function showToast(msg = 'Alterações salvas!') {
