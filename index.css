@@ -1364,37 +1364,50 @@ button {
 }
 
 /* ============================================================
-   RESPONSIVE — MOBILE (< 768px)
+   RESPONSIVE — TABLET & MOBILE (< 768px)
    ============================================================ */
 @media (max-width: 768px) {
   :root {
-    --header-height: 64px;
+    --header-height: 60px;
   }
 
   .section-padding {
-    padding: var(--space-16) 0;
+    padding: var(--space-12) 0;
   }
 
-  /* Header mobile */
+  .container {
+    padding: 0 var(--space-5);
+  }
+
+  /* -------- HEADER MOBILE -------- */
   .menu-toggle {
     display: flex;
   }
 
+  .header-logo img {
+    height: 32px;
+  }
+
+  /* Mobile Menu Overlay */
   .nav-menu {
     position: fixed;
     top: 0;
     right: -100%;
-    width: 280px;
+    width: 100%;
+    max-width: 300px;
     height: 100vh;
+    height: 100dvh;
     background: rgba(10, 10, 10, 0.98);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     flex-direction: column;
     justify-content: center;
-    gap: var(--space-8);
+    align-items: center;
+    gap: var(--space-10);
     padding: var(--space-10);
-    transition: right var(--transition-elegant);
-    border-left: 1px solid rgba(201, 162, 77, 0.1);
+    transition: right 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    border-left: 1px solid rgba(201, 162, 77, 0.15);
+    z-index: 1001;
   }
 
   .nav-menu.open {
@@ -1402,109 +1415,243 @@ button {
   }
 
   .nav-link {
-    font-size: 14px;
+    font-size: 15px;
     letter-spacing: 3px;
+    padding: var(--space-3) 0;
   }
 
-  /* Hero */
+  /* -------- HERO MOBILE -------- */
+  .hero {
+    min-height: 100vh;
+    min-height: 100dvh;
+  }
+
+  .hero-content {
+    padding: 0 var(--space-5);
+  }
+
+  .hero-overline {
+    font-size: 10px;
+    letter-spacing: 4px;
+    margin-bottom: var(--space-4);
+  }
+
   .hero-title {
-    font-size: clamp(1.8rem, 6vw, 2.5rem);
+    font-size: clamp(1.6rem, 7vw, 2.4rem);
+    margin-bottom: var(--space-4);
   }
 
   .hero-subtitle {
-    font-size: 0.95rem;
+    font-size: 0.9rem;
+    line-height: 1.7;
+    margin-bottom: var(--space-8);
+  }
+
+  .hero-cta .btn {
+    padding: 12px 28px;
+    font-size: 11px;
   }
 
   .hero-scroll-indicator {
     display: none;
   }
 
-  /* Differentials */
+  /* -------- DIFFERENTIALS MOBILE -------- */
+  .differentials {
+    padding: var(--space-8) 0;
+  }
+
   .differentials-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-6);
+    gap: var(--space-5);
   }
 
   .differential-item {
     flex-direction: row;
     text-align: left;
     gap: var(--space-4);
+    padding: var(--space-3) 0;
   }
 
-  /* Products */
-  .products-grid,
-  .product-category.active {
-    grid-template-columns: repeat(2, 1fr);
-    gap: var(--space-4);
+  .differential-icon {
+    width: 40px;
+    height: 40px;
+    flex-shrink: 0;
   }
 
+  .differential-icon svg {
+    width: 24px;
+    height: 24px;
+  }
+
+  /* -------- COLLECTIONS / PRODUCTS MOBILE -------- */
   .category-tabs {
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
     gap: var(--space-2);
+    padding-bottom: var(--space-3);
+    margin-bottom: var(--space-8);
+    scrollbar-width: none;
+    justify-content: flex-start;
+  }
+
+  .category-tabs::-webkit-scrollbar {
+    display: none;
   }
 
   .category-tab {
-    padding: 10px 16px;
+    padding: 10px 18px;
     font-size: 10px;
     letter-spacing: 1.5px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .products-grid,
+  .product-category.active {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-3);
   }
 
   .product-info {
-    padding: var(--space-4);
+    padding: var(--space-3);
   }
 
   .product-name {
-    font-size: 13px;
+    font-size: 12px;
+    line-height: 1.3;
+    margin-bottom: var(--space-1);
   }
 
   .product-price {
-    font-size: 16px;
+    font-size: 15px;
+    margin-bottom: 2px;
   }
 
-  /* Tailoring */
+  .product-installment {
+    font-size: 10px;
+    margin-bottom: var(--space-3);
+  }
+
+  .product-actions {
+    gap: var(--space-1);
+  }
+
+  .product-actions .btn {
+    font-size: 8px;
+    padding: 8px 8px;
+    letter-spacing: 1px;
+  }
+
+  .product-badge {
+    padding: 3px 8px;
+    font-size: 8px;
+    letter-spacing: 1px;
+  }
+
+  /* -------- TAILORING MOBILE -------- */
   .tailoring-grid {
     grid-template-columns: 1fr;
     gap: var(--space-8);
+  }
+
+  .tailoring-image {
+    aspect-ratio: 16 / 10;
   }
 
   .tailoring-content {
     max-width: 100%;
   }
 
-  /* Club */
+  .tailoring-content .section-title {
+    font-size: clamp(1.5rem, 5vw, 2rem);
+  }
+
+  .tailoring-feature h4 {
+    font-size: 13px;
+  }
+
+  .tailoring-feature p {
+    font-size: 12px;
+  }
+
+  /* -------- CLUB MOBILE -------- */
   .club-card {
-    padding: var(--space-10) var(--space-6);
+    padding: var(--space-8) var(--space-5);
+  }
+
+  .club-badge {
+    padding: 8px 18px;
+    font-size: 10px;
+    letter-spacing: 2px;
   }
 
   .club-benefits {
     grid-template-columns: 1fr;
-    gap: var(--space-6);
+    gap: var(--space-5);
   }
 
-  /* Tips */
+  .club-coming-soon {
+    padding: var(--space-4);
+  }
+
+  .club-coming-soon p {
+    font-size: 13px;
+  }
+
+  /* -------- TIPS MOBILE -------- */
   .tips-grid {
     grid-template-columns: 1fr;
-    gap: var(--space-6);
+    gap: var(--space-5);
   }
 
-  /* Tip Modal */
   .tip-modal-body {
-    padding: var(--space-6);
+    padding: var(--space-5);
+    margin: var(--space-4);
   }
 
   .tip-modal-body h2 {
-    font-size: 1.4rem;
+    font-size: 1.3rem;
   }
 
-  /* Footer */
+  /* -------- FOOTER MOBILE -------- */
   .footer-top {
     grid-template-columns: 1fr;
-    gap: var(--space-8);
+    gap: var(--space-6);
+    text-align: center;
+  }
+
+  .footer-brand img {
+    margin: 0 auto;
+  }
+
+  .footer-social {
+    justify-content: center;
   }
 
   .footer-bottom {
     flex-direction: column;
-    gap: var(--space-4);
+    gap: var(--space-3);
     text-align: center;
+  }
+
+  .footer-bottom-links {
+    justify-content: center;
+  }
+
+  /* -------- SECTION TITLES MOBILE -------- */
+  .section-title {
+    font-size: clamp(1.5rem, 5vw, 2.2rem);
+  }
+
+  .section-subtitle {
+    font-size: 0.9rem;
+  }
+
+  .gold-line {
+    margin: var(--space-3) auto;
   }
 }
 
@@ -1517,20 +1664,53 @@ button {
   }
 
   .hero-overline {
-    font-size: 10px;
-    letter-spacing: 4px;
+    font-size: 9px;
+    letter-spacing: 3px;
+  }
+
+  .hero-title {
+    font-size: clamp(1.4rem, 7vw, 1.8rem);
+  }
+
+  .hero-subtitle {
+    font-size: 0.85rem;
   }
 
   .products-grid,
   .product-category.active {
     grid-template-columns: 1fr 1fr;
-    gap: var(--space-3);
+    gap: var(--space-2);
+  }
+
+  .product-name {
+    font-size: 11px;
+  }
+
+  .product-price {
+    font-size: 14px;
   }
 
   .product-actions .btn {
+    font-size: 7px;
+    padding: 7px 6px;
+    letter-spacing: 0.5px;
+  }
+
+  .category-tab {
+    padding: 8px 14px;
     font-size: 9px;
-    padding: 9px 10px;
-    letter-spacing: 1px;
+  }
+
+  .club-card {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .tailoring-content .section-title {
+    font-size: 1.3rem;
+  }
+
+  .footer {
+    padding: var(--space-10) 0 var(--space-6);
   }
 }
 
