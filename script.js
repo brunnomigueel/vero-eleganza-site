@@ -55,25 +55,25 @@
             ? `<a href="${product.link}" class="btn btn-checkout" target="_blank">Finalizar Compra</a>`
             : `<a href="#" class="btn btn-checkout" data-product="${product.id}">Finalizar Compra</a>`;
 
-          const html = \`
-            <div class="product-card reveal \${delayClass}">
+          const html = `
+            <div class="product-card reveal ${delayClass}">
               <div class="product-image">
-                <img src="\${imageSrc}" alt="\${product.name}" loading="lazy" width="600" height="800">
-                \${badgeHtml}
+                <img src="${imageSrc}" alt="${product.name}" loading="lazy" width="600" height="800">
+                ${badgeHtml}
               </div>
               <div class="product-info">
-                <h3 class="product-name">\${product.name}</h3>
-                <p class="product-price">\${formatCurrency(product.price)}</p>
-                <p class="product-installment">\${formatInstallments(product.price)}</p>
+                <h3 class="product-name">${product.name}</h3>
+                <p class="product-price">${formatCurrency(product.price)}</p>
+                <p class="product-installment">${formatInstallments(product.price)}</p>
                 <div class="product-actions">
-                  <a href="#" class="btn btn-whatsapp" data-whatsapp="\${waMessage}">
-                    \${whatsappSvg} Comprar via WhatsApp
+                  <a href="#" class="btn btn-whatsapp" data-whatsapp="${waMessage}">
+                    ${whatsappSvg} Comprar via WhatsApp
                   </a>
-                  \${checkoutBtn}
+                  ${checkoutBtn}
                 </div>
               </div>
             </div>
-          \`;
+          `;
           container.insertAdjacentHTML('beforeend', html);
         });
       }
