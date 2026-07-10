@@ -443,28 +443,28 @@
 
     async function loadFirebaseData() {
       try {
-        const storeDoc = await getDoc(doc(db, "vero_eleganza", "store_data"));
+        const getDocPromise = getDoc(doc(db, "vero_eleganza", "store_data"));
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout Firebase")), 4000));
+        
+        const storeDoc = await Promise.race([getDocPromise, timeoutPromise]);
+        
         if (storeDoc.exists()) {
           const data = storeDoc.data();
           if (data.config) appData.config = data.config;
           if (data.categories) appData.categories = data.categories;
           if (data.products) appData.products = data.products;
         } else {
-          // If Firestore is empty, try to get from localStorage as fallback
-          const localProducts = JSON.parse(localStorage.getItem('veroEleganza_products'));
-          const localConfig = JSON.parse(localStorage.getItem('veroEleganza_config'));
-          if (localProducts) {
-             appData.products = localProducts;
-          }
-          if (localConfig) {
-             appData.config = localConfig;
-          }
+          throw new Error("Documento vazio");
         }
-        renderApp();
       } catch(err) {
-        console.error("Erro ao carregar do Firebase:", err);
-        alert("Erro ao conectar ao banco de dados.");
+        console.warn("Erro ou timeout no Firebase, usando cache local:", err);
+        const localProducts = JSON.parse(localStorage.getItem('veroEleganza_products'));
+        const localConfig = JSON.parse(localStorage.getItem('veroEleganza_config'));
+        if (localProducts) appData.products = localProducts;
+        if (localConfig) appData.config = localConfig;
+        alert("Aviso: Conexão com Firebase falhou. O painel foi carregado offline. (Verifique as regras do Firebase Firestore e clique em 'Salvar Tudo' para tentar reenviar)");
       }
+      renderApp();
     }
 
     // --- RENDER APP ---
@@ -643,12 +643,19 @@
           });
         });
 
-        // Push to Firebase
-        await setDoc(doc(db, "vero_eleganza", "store_data"), {
+        // Salva backup no localStorage caso firebase falhe
+        localStorage.setItem('veroEleganza_config', JSON.stringify(appData.config));
+        localStorage.setItem('veroEleganza_products', JSON.stringify(appData.products));
+
+        // Push to Firebase with timeout
+        const setDocPromise = setDoc(doc(db, "vero_eleganza", "store_data"), {
            config: appData.config,
            categories: appData.categories,
            products: appData.products
         });
+        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout Firebase")), 5000));
+        
+        await Promise.race([setDocPromise, timeoutPromise]);
 
         showToast('Tudo salvo no Firebase!');
       } catch (e) {

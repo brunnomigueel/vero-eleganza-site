@@ -16,7 +16,11 @@ const whatsappSvg = `<svg viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149
 
 async function loadStoreData() {
   try {
-    const storeDoc = await getDoc(doc(db, "vero_eleganza", "store_data"));
+    const storeDocPromise = getDoc(doc(db, "vero_eleganza", "store_data"));
+    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Timeout Firebase")), 4000));
+    
+    const storeDoc = await Promise.race([storeDocPromise, timeoutPromise]);
+    
     if (storeDoc.exists()) {
       const data = storeDoc.data();
       if (data.config && data.config.whatsappNumber) {
@@ -28,20 +32,24 @@ async function loadStoreData() {
       }
       renderCategoriesAndProducts(data.categories || [], data.products || {});
     } else {
-      // Fallback para dados locais se o Firebase estiver vazio
-      const localData = JSON.parse(localStorage.getItem('veroEleganza_products'));
-      if (localData) {
-        const defaultCats = [
-          {id: 'ternos', name: 'Ternos'},
-          {id: 'camisas', name: 'Camisas'},
-          {id: 'sueteres', name: 'Suéteres'},
-          {id: 'gravatas', name: 'Gravatas'}
-        ];
-        renderCategoriesAndProducts(defaultCats, localData);
-      }
+      throw new Error("Documento não existe no Firebase");
     }
   } catch (error) {
-    console.error("Erro ao carregar dados:", error);
+    console.error("Erro ao carregar dados, usando fallback local:", error);
+    // Fallback para dados locais se o Firebase falhar ou estiver vazio
+    const localData = JSON.parse(localStorage.getItem('veroEleganza_products'));
+    const defaultCats = [
+      {id: 'ternos', name: 'Ternos'},
+      {id: 'camisas', name: 'Camisas'},
+      {id: 'sueteres', name: 'Suéteres'},
+      {id: 'gravatas', name: 'Gravatas'}
+    ];
+    
+    if (localData) {
+      renderCategoriesAndProducts(defaultCats, localData);
+    } else {
+      renderCategoriesAndProducts([], {}); // Render empty containers if no local data
+    }
   }
 }
 
