@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vero Eleganza | Links</title>
+
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background: radial-gradient(circle at top, #1c1c1c, #050505 70%);
+      color: #fff;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 30px 18px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 430px;
+      text-align: center;
+    }
+
+    .logo {
+      width: 120px;
+      height: auto;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      font-size: 28px;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+      font-weight: 700;
+    }
+
+    .subtitle {
+      color: #c9a24d;
+      font-size: 15px;
+      margin-bottom: 32px;
+    }
+
+    .links {
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+    }
+
+    .btn {
+      display: block;
+      width: 100%;
+      padding: 17px 20px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid rgba(201,162,77,0.45);
+      color: #fff;
+      text-decoration: none;
+      font-size: 16px;
+      font-weight: 700;
+      transition: 0.3s;
+    }
+
+    .btn:hover {
+      background: #c9a24d;
+      color: #000;
+      transform: translateY(-3px);
+    }
+
+    .whatsapp {
+      background: #25D366;
+      color: #000;
+      border: none;
+    }
+
+    .disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      pointer-events: none;
+    }
+
+    footer {
+      margin-top: 32px;
+      font-size: 13px;
+      color: #aaa;
+    }
+
+    footer span {
+      color: #c9a24d;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main class="container">
+    <img src="vero.png" alt="Vero Eleganza" class="logo">
+
+    <h1>VERO ELEGANZA</h1>
+    <p class="subtitle">Elegância a um toque de distância</p>
+
+    <div class="links">
+      <a class="btn" href="https://www.instagram.com/vero.eleganza/" target="_blank">
+        Instagram
+      </a>
+
+      <a class="btn whatsapp" href="https://wa.me/5551999999999" target="_blank">
+        Compre no WhatsApp
+      </a>
+
+      <a class="btn disabled" href="#">
+        Site Oficial — em breve
+      </a>
+
+      <a class="btn disabled" href="#">
+        YouTube — em breve
+      </a>
+
+      <a class="btn disabled" href="#">
+        TikTok — em breve
+      </a>
+    </div>
+
+    <footer>
+      <p><span>Vero Eleganza</span> • Campo Bom - RS</p>
+    </footer>
+  </main>
+
+</body>
+</html>

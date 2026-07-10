@@ -1,0 +1,12 @@
+# Editor directories and files
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Ignorar arquivos temporários se houver
+*.tmp
+*.bak
+*.swp
+
+# (Nota: as imagens dentro de assets/images/ devem ser commitadas, pois fazem parte do site estático)

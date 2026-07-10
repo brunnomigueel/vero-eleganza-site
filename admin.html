@@ -1,0 +1,608 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Painel Administrativo | Vero Eleganza</title>
+  <link rel="icon" type="image/png" href="vero Logo loja .png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    :root {
+      --bg-dark: #0A0A0A;
+      --bg-card: #111111;
+      --bg-hover: #1A1A1A;
+      --gold: #C9A24D;
+      --gold-hover: #DBC075;
+      --text-main: #FFFFFF;
+      --text-muted: #888888;
+      --border: rgba(201, 162, 77, 0.15);
+      --danger: #ef4444;
+      --success: #10b981;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* --- LOGIN SCREEN --- */
+    #login-screen {
+      position: fixed;
+      inset: 0;
+      background: var(--bg-dark);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+
+    .login-box {
+      background: var(--bg-card);
+      padding: 40px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      width: 100%;
+      max-width: 400px;
+      text-align: center;
+    }
+
+    .login-box img { max-width: 200px; margin-bottom: 30px; }
+    .login-box h2 { font-size: 18px; margin-bottom: 20px; font-weight: 400; color: var(--gold); }
+    
+    /* --- DASHBOARD LAYOUT --- */
+    #dashboard {
+      display: none;
+      height: 100vh;
+      grid-template-columns: 260px 1fr;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--bg-card);
+      border-right: 1px solid var(--border);
+      padding: 24px 0;
+      display: flex;
+      flex-direction: column;
+    }
+    
+    .sidebar-logo {
+      padding: 0 24px 30px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+    }
+    .sidebar-logo img { max-width: 150px; }
+
+    .nav-item {
+      padding: 12px 24px;
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .nav-item:hover { color: var(--text-main); background: var(--bg-hover); }
+    .nav-item.active { color: var(--gold); background: rgba(201, 162, 77, 0.05); border-right: 3px solid var(--gold); }
+    .nav-item.logout { margin-top: auto; color: var(--danger); }
+
+    /* Main Content */
+    .main-content {
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Topbar */
+    .topbar {
+      height: 70px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 30px;
+      background: var(--bg-dark);
+    }
+
+    .topbar-actions { display: flex; gap: 10px; }
+
+    /* Content Area */
+    .content-area {
+      flex: 1;
+      overflow-y: auto;
+      padding: 30px;
+    }
+    .section-view { display: none; }
+    .section-view.active { display: block; }
+    
+    .section-title { font-size: 24px; font-weight: 500; margin-bottom: 24px; color: var(--gold); }
+
+    /* --- COMPONENTS --- */
+    .form-group { margin-bottom: 20px; }
+    .form-group label { display: block; font-size: 13px; color: var(--text-muted); margin-bottom: 8px; text-transform: uppercase; letter-spacing: 1px; }
+    
+    input[type="text"], input[type="number"], input[type="password"], select, textarea {
+      width: 100%;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      color: var(--text-main);
+      padding: 12px;
+      border-radius: 4px;
+      font-size: 14px;
+      outline: none;
+      transition: border-color 0.2s;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--gold); }
+    
+    .btn {
+      padding: 10px 20px;
+      border-radius: 4px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: none;
+      transition: all 0.2s;
+    }
+    .btn-gold { background: var(--gold); color: #000; }
+    .btn-gold:hover { background: var(--gold-hover); }
+    .btn-outline { background: transparent; border: 1px solid var(--gold); color: var(--gold); }
+    .btn-outline:hover { background: rgba(201, 162, 77, 0.1); }
+    .btn-danger { background: rgba(239, 68, 68, 0.1); border: 1px solid var(--danger); color: var(--danger); }
+    .btn-danger:hover { background: var(--danger); color: white; }
+
+    /* Config Panel */
+    .config-panel { background: var(--bg-card); padding: 30px; border-radius: 8px; border: 1px solid var(--border); max-width: 600px; }
+
+    /* Products List */
+    .product-list { display: flex; flex-direction: column; gap: 16px; margin-bottom: 30px; }
+    
+    .product-row {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 20px;
+      display: grid;
+      grid-template-columns: 80px 1fr;
+      gap: 20px;
+      align-items: start;
+    }
+    
+    .product-row-image {
+      width: 80px;
+      height: 100px;
+      background: var(--bg-dark);
+      border: 1px dashed var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      overflow: hidden;
+      cursor: pointer;
+      position: relative;
+    }
+    .product-row-image img { width: 100%; height: 100%; object-fit: cover; }
+    .product-row-image:hover::after {
+      content: 'Trocar';
+      position: absolute;
+      inset: 0;
+      background: rgba(0,0,0,0.7);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+    }
+
+    .product-row-form {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 15px;
+    }
+    .full-col { grid-column: 1 / -1; }
+    
+    .product-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-top: 15px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255,255,255,0.05);
+    }
+    
+    /* Toggle Switch */
+    .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--bg-dark); border: 1px solid var(--border); transition: .4s; border-radius: 34px; }
+    .slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background-color: var(--text-muted); transition: .4s; border-radius: 50%; }
+    input:checked + .slider { background-color: rgba(201, 162, 77, 0.2); border-color: var(--gold); }
+    input:checked + .slider:before { transform: translateX(20px); background-color: var(--gold); }
+    .switch-wrap { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-muted); }
+
+    /* Toast */
+    #toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--gold);
+      color: #000;
+      padding: 12px 24px;
+      border-radius: 4px;
+      font-weight: 600;
+      transform: translateY(100px);
+      opacity: 0;
+      transition: all 0.3s;
+      z-index: 9999;
+    }
+    #toast.show { transform: translateY(0); opacity: 1; }
+  </style>
+</head>
+<body>
+
+  <!-- LOGIN SCREEN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <img src="logo branca.png" alt="Vero Eleganza">
+      <h2>Acesso Administrativo</h2>
+      <form id="login-form">
+        <div class="form-group">
+          <input type="password" id="login-pwd" placeholder="Digite a senha (padrão: vero2026)" required>
+        </div>
+        <button type="submit" class="btn btn-gold" style="width: 100%">Entrar</button>
+        <p id="login-error" style="color: var(--danger); font-size: 12px; margin-top: 10px; display: none;">Senha incorreta</p>
+      </form>
+    </div>
+  </div>
+
+  <!-- DASHBOARD -->
+  <div id="dashboard">
+    <!-- Sidebar -->
+    <div class="sidebar">
+      <div class="sidebar-logo">
+        <img src="logo texto.png" alt="Vero Eleganza">
+      </div>
+      <div class="nav-item active" data-target="config">
+        Configurações Gerais
+      </div>
+      <div class="nav-item" data-target="cat-ternos">
+        Ternos
+      </div>
+      <div class="nav-item" data-target="cat-camisas">
+        Camisas
+      </div>
+      <div class="nav-item" data-target="cat-sueteres">
+        Suéteres
+      </div>
+      <div class="nav-item" data-target="cat-gravatas">
+        Gravatas
+      </div>
+      <div class="nav-item logout" id="btn-logout">
+        Sair
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+      <!-- Topbar -->
+      <div class="topbar">
+        <div>Painel de Controle</div>
+        <div class="topbar-actions">
+          <button class="btn btn-outline" id="btn-import" onclick="document.getElementById('import-file').click()">Importar JSON</button>
+          <input type="file" id="import-file" style="display:none" accept=".json">
+          <button class="btn btn-outline" id="btn-export">Exportar JSON</button>
+          <a href="index.html" target="_blank" class="btn btn-outline">Ver Site</a>
+          <button class="btn btn-gold" id="btn-save-all">Salvar Tudo</button>
+        </div>
+      </div>
+
+      <!-- Content Area -->
+      <div class="content-area">
+        
+        <!-- View: Configurações -->
+        <div id="view-config" class="section-view active">
+          <h2 class="section-title">Configurações Gerais</h2>
+          <div class="config-panel">
+            <div class="form-group">
+              <label>Número do WhatsApp (apenas números, com código do país)</label>
+              <input type="text" id="cfg-whatsapp" placeholder="Ex: 5551999999999">
+            </div>
+            <div class="form-group">
+              <label>Link do Instagram</label>
+              <input type="text" id="cfg-instagram" placeholder="https://instagram.com/vero.eleganza">
+            </div>
+            <div class="form-group">
+              <label>Nova Senha do Admin (Deixe em branco para não alterar)</label>
+              <input type="password" id="cfg-password" placeholder="Nova senha">
+            </div>
+          </div>
+        </div>
+
+        <!-- Views: Categorias (Geradas dinamicamente) -->
+        <div id="view-cat-ternos" class="section-view">
+          <h2 class="section-title">Ternos</h2>
+          <div class="product-list" id="list-ternos"></div>
+          <button class="btn btn-outline" onclick="addProduct('ternos')">+ Adicionar Terno</button>
+        </div>
+
+        <div id="view-cat-camisas" class="section-view">
+          <h2 class="section-title">Camisas</h2>
+          <div class="product-list" id="list-camisas"></div>
+          <button class="btn btn-outline" onclick="addProduct('camisas')">+ Adicionar Camisa</button>
+        </div>
+
+        <div id="view-cat-sueteres" class="section-view">
+          <h2 class="section-title">Suéteres</h2>
+          <div class="product-list" id="list-sueteres"></div>
+          <button class="btn btn-outline" onclick="addProduct('sueteres')">+ Adicionar Suéter</button>
+        </div>
+
+        <div id="view-cat-gravatas" class="section-view">
+          <h2 class="section-title">Gravatas</h2>
+          <div class="product-list" id="list-gravatas"></div>
+          <button class="btn btn-outline" onclick="addProduct('gravatas')">+ Adicionar Gravata</button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div id="toast">Alterações salvas!</div>
+
+  <!-- JAVASCRIPT -->
+  <script>
+    // --- DEFAULT DATA ---
+    const DEFAULT_CONFIG = {
+      whatsappNumber: '5551999999999',
+      instagramUrl: 'https://www.instagram.com/vero.eleganza/'
+    };
+
+    const DEFAULT_PRODUCTS = {
+      ternos: [
+        { id: 't1', name: 'Terno Slim Masculino — Preto', price: 1499.90, link: '', badge: 'Destaque', image: 'assets/images/ternos/terno-slim-preto.png', active: true },
+        { id: 't2', name: 'Terno Slim Masculino — Grafite', price: 1599.90, link: '', badge: 'Novo', image: 'assets/images/ternos/terno-slim-grafite.webp', active: true },
+        { id: 't3', name: 'Terno Slim Masculino — Azul Marinho', price: 1599.90, link: '', badge: '', image: 'assets/images/ternos/terno-slim-preto.png', active: true },
+        { id: 't4', name: 'Terno Slim Masculino — Cinza Chumbo', price: 1799.90, link: '', badge: 'Premium', image: 'assets/images/ternos/terno-slim-grafite.webp', active: true }
+      ],
+      camisas: [
+        { id: 'c1', name: 'Camisa Social Slim — Branca', price: 249.90, link: '', badge: 'Essencial', image: 'assets/images/camisas/camisa-social-branca.jpg', active: true },
+        { id: 'c2', name: 'Camisa Social Slim — Azul Marinho', price: 279.90, link: '', badge: '', image: 'assets/images/camisas/camisa-social-azul.jpg', active: true },
+        { id: 'c3', name: 'Camisa Social Slim — Listrada Azul', price: 299.90, link: '', badge: 'Novo', image: 'assets/images/camisas/camisa-social-listrada.jpg', active: true },
+        { id: 'c4', name: 'Camisa Social Slim — Preta', price: 269.90, link: '', badge: '', image: 'assets/images/camisas/camisa-social-branca.jpg', active: true }
+      ],
+      sueteres: [
+        { id: 's1', name: 'Suéter Gola V — Preto', price: 329.90, link: '', badge: 'Inverno', image: 'assets/images/sueteres/sueter-preto.jpg', active: true },
+        { id: 's2', name: 'Suéter Gola Redonda — Cinza', price: 299.90, link: '', badge: '', image: 'assets/images/sueteres/sueter-cinza.jpg', active: true },
+        { id: 's3', name: 'Suéter Gola V — Azul Marinho', price: 329.90, link: '', badge: 'Novo', image: 'assets/images/sueteres/sueter-preto.jpg', active: true },
+        { id: 's4', name: 'Suéter Gola Alta — Preto', price: 399.90, link: '', badge: 'Premium', image: 'assets/images/sueteres/sueter-cinza.jpg', active: true }
+      ],
+      gravatas: [
+        { id: 'g1', name: 'Gravata Seda — Preta Geométrica', price: 179.90, link: '', badge: 'Clássica', image: 'assets/images/gravatas/gravata-seda-preta.jpg', active: true },
+        { id: 'g2', name: 'Gravata Seda — Vinho Listrada', price: 189.90, link: '', badge: 'Destaque', image: 'assets/images/gravatas/gravata-seda-vinho.jpg', active: true },
+        { id: 'g3', name: 'Gravata Seda — Azul Marinho', price: 169.90, link: '', badge: '', image: 'assets/images/gravatas/gravata-seda-preta.jpg', active: true },
+        { id: 'g4', name: 'Gravata Seda — Cinza Prata', price: 179.90, link: '', badge: 'Elegante', image: 'assets/images/gravatas/gravata-seda-vinho.jpg', active: true }
+      ]
+    };
+
+    // --- STATE ---
+    let appData = {
+      config: JSON.parse(localStorage.getItem('veroEleganza_config')) || DEFAULT_CONFIG,
+      products: JSON.parse(localStorage.getItem('veroEleganza_products')) || DEFAULT_PRODUCTS
+    };
+
+    // --- LOGIN LOGIC ---
+    const pwdHash = localStorage.getItem('veroEleganza_adminPwd') || btoa('vero2026');
+    
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const input = document.getElementById('login-pwd').value;
+      if (btoa(input) === pwdHash) {
+        document.getElementById('login-screen').style.display = 'none';
+        document.getElementById('dashboard').style.display = 'grid';
+        renderApp();
+      } else {
+        document.getElementById('login-error').style.display = 'block';
+      }
+    });
+
+    document.getElementById('btn-logout').addEventListener('click', () => {
+      location.reload();
+    });
+
+    // --- NAVIGATION ---
+    document.querySelectorAll('.nav-item').forEach(item => {
+      if (item.classList.contains('logout')) return;
+      item.addEventListener('click', () => {
+        document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+        document.querySelectorAll('.section-view').forEach(s => s.classList.remove('active'));
+        
+        item.classList.add('active');
+        document.getElementById('view-' + item.dataset.target).classList.add('active');
+      });
+    });
+
+    // --- RENDER APP ---
+    function renderApp() {
+      // Configs
+      document.getElementById('cfg-whatsapp').value = appData.config.whatsappNumber;
+      document.getElementById('cfg-instagram').value = appData.config.instagramUrl;
+
+      // Products
+      ['ternos', 'camisas', 'sueteres', 'gravatas'].forEach(cat => {
+        const container = document.getElementById('list-' + cat);
+        container.innerHTML = '';
+        appData.products[cat].forEach(p => {
+          container.appendChild(createProductRow(cat, p));
+        });
+      });
+    }
+
+    function createProductRow(category, product) {
+      const div = document.createElement('div');
+      div.className = 'product-row';
+      div.id = `row-${product.id}`;
+      
+      const badgeOptions = ['Nenhum', 'Destaque', 'Novo', 'Premium', 'Inverno', 'Clássica', 'Essencial', 'Elegante']
+        .map(b => `<option value="${b==='Nenhum'?'':b}" ${product.badge===b?'selected':''}>${b}</option>`).join('');
+
+      const imgSrc = product.image.startsWith('data:') || product.image.startsWith('http') || product.image.startsWith('assets') ? product.image : 'assets/images/hero-bg.jpg';
+
+      div.innerHTML = `
+        <div class="product-row-image" onclick="document.getElementById('img-upload-${product.id}').click()">
+          <img src="${imgSrc}" id="img-prev-${product.id}">
+          <input type="file" id="img-upload-${product.id}" style="display:none" accept="image/*" onchange="handleImageUpload(event, '${product.id}')">
+        </div>
+        <div class="product-row-form">
+          <div class="form-group full-col" style="margin:0">
+            <label>Nome do Produto</label>
+            <input type="text" value="${product.name}" id="name-${product.id}">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Preço (R$)</label>
+            <input type="number" step="0.01" value="${product.price}" id="price-${product.id}">
+          </div>
+          <div class="form-group" style="margin:0">
+            <label>Selo (Badge)</label>
+            <select id="badge-${product.id}">
+              ${badgeOptions}
+            </select>
+          </div>
+          <div class="form-group full-col" style="margin:0">
+            <label>Link Botão "Finalizar Compra" (Vazio = WhatsApp)</label>
+            <input type="text" value="${product.link}" id="link-${product.id}" placeholder="https://checkout.com/...">
+          </div>
+          <div class="full-col product-actions">
+            <label class="switch-wrap">
+              <label class="switch">
+                <input type="checkbox" id="active-${product.id}" ${product.active ? 'checked' : ''}>
+                <span class="slider"></span>
+              </label>
+              Produto Ativo no Site
+            </label>
+            <button class="btn btn-danger" onclick="removeProduct('${category}', '${product.id}')">Excluir</button>
+          </div>
+        </div>
+      `;
+      return div;
+    }
+
+    // --- ACTIONS ---
+    window.handleImageUpload = function(event, id) {
+      const file = event.target.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          document.getElementById('img-prev-' + id).src = e.target.result;
+          // Guardar na propriedade data do img para salvar depois
+          document.getElementById('img-prev-' + id).dataset.base64 = e.target.result;
+        }
+        reader.readAsDataURL(file);
+      }
+    };
+
+    window.addProduct = function(category) {
+      const id = Date.now().toString();
+      const newProduct = {
+        id: id,
+        name: 'Novo Produto',
+        price: 0.00,
+        link: '',
+        badge: '',
+        image: 'assets/images/hero-bg.jpg',
+        active: true
+      };
+      appData.products[category].push(newProduct);
+      document.getElementById('list-' + category).appendChild(createProductRow(category, newProduct));
+    };
+
+    window.removeProduct = function(category, id) {
+      if (confirm('Tem certeza que deseja excluir este produto?')) {
+        appData.products[category] = appData.products[category].filter(p => p.id !== id);
+        document.getElementById('row-' + id).remove();
+      }
+    };
+
+    // --- SAVE ---
+    document.getElementById('btn-save-all').addEventListener('click', () => {
+      // Config
+      appData.config.whatsappNumber = document.getElementById('cfg-whatsapp').value;
+      appData.config.instagramUrl = document.getElementById('cfg-instagram').value;
+      
+      const newPwd = document.getElementById('cfg-password').value;
+      if (newPwd) {
+        localStorage.setItem('veroEleganza_adminPwd', btoa(newPwd));
+        document.getElementById('cfg-password').value = '';
+      }
+
+      // Products
+      ['ternos', 'camisas', 'sueteres', 'gravatas'].forEach(cat => {
+        appData.products[cat].forEach(p => {
+          if(document.getElementById('row-' + p.id)) {
+            p.name = document.getElementById('name-' + p.id).value;
+            p.price = parseFloat(document.getElementById('price-' + p.id).value);
+            p.badge = document.getElementById('badge-' + p.id).value;
+            p.link = document.getElementById('link-' + p.id).value;
+            p.active = document.getElementById('active-' + p.id).checked;
+            
+            const imgEl = document.getElementById('img-prev-' + p.id);
+            if (imgEl.dataset.base64) {
+              p.image = imgEl.dataset.base64;
+            }
+          }
+        });
+      });
+
+      // Salvar no localStorage
+      localStorage.setItem('veroEleganza_config', JSON.stringify(appData.config));
+      localStorage.setItem('veroEleganza_products', JSON.stringify(appData.products));
+
+      showToast();
+    });
+
+    // --- IMPORT/EXPORT ---
+    document.getElementById('btn-export').addEventListener('click', () => {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(appData));
+      const downloadAnchorNode = document.createElement('a');
+      downloadAnchorNode.setAttribute("href", dataStr);
+      downloadAnchorNode.setAttribute("download", "vero_eleganza_backup.json");
+      document.body.appendChild(downloadAnchorNode);
+      downloadAnchorNode.click();
+      downloadAnchorNode.remove();
+    });
+
+    document.getElementById('import-file').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.config && imported.products) {
+            appData = imported;
+            renderApp();
+            showToast('JSON Importado. Lembre de Salvar Tudo!');
+          }
+        } catch (err) {
+          alert("Arquivo JSON inválido.");
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    function showToast(msg = 'Alterações salvas!') {
+      const t = document.getElementById('toast');
+      t.innerText = msg;
+      t.classList.add('show');
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+  </script>
+</body>
+</html>
